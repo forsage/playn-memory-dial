@@ -16,6 +16,7 @@
 package memdial.core;
 
 import playn.core.*;
+import playn.core.util.Callback;
 
 import static playn.core.PlayN.*;
 
@@ -35,16 +36,16 @@ public class Pea {
         // Add a callback for when the image loads.
         // This is necessary because we can't use the width/height (to center the
         // image) until after the image has been loaded
-        image.addCallback(new ResourceCallback<Image>() {
+        image.addCallback(new Callback<Image>() {
             @Override
-            public void done(Image image) {
-                imageLayer.setOrigin(image.width() / 2f, image.height() / 2f).setTranslation(x, y).setDepth(0);
+            public void onSuccess(Image result) {
+                imageLayer.setOrigin(result.width() / 2f, result.height() / 2f).setTranslation(x, y).setDepth(0);
                 peaLayer.add(imageLayer);
             }
 
             @Override
-            public void error(Throwable err) {
-                log().error("Error loading image!", err);
+            public void onFailure(Throwable cause) {
+                log().error("Error loading image!", cause);
             }
         });
 
@@ -53,7 +54,7 @@ public class Pea {
         peaLayer.add(textLayer);
     }
 
-    public void update(float delta) {
+    public void update(int delta) {
         if (index % 2 == 0) {
             angle += delta;
         } else {
@@ -67,8 +68,7 @@ public class Pea {
         Font font = graphics().createFont("Helvetica", Font.Style.BOLD, 16f);
         TextFormat format = new TextFormat().withFont(font);
         TextLayout layout = graphics().layoutText(text, format);
-        ImageLayer layer = createTextLayer(layout, 0xFF000000);
-        return layer;
+        return createTextLayer(layout, 0xFF000000);
     }
 
     protected ImageLayer createTextLayer(TextLayout layout, int color) {

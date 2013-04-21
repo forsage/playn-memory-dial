@@ -16,18 +16,33 @@
 package memdial.core;
 
 import playn.core.*;
+import playn.java.JavaPlatform;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static playn.core.PlayN.*;
 
-public class Memdial implements Game {
+public class Memdial extends Game.Default {
     GroupLayer peaLayer;
     List<Pea> peas = new ArrayList<Pea>(0);
+    Dial dial;
+
+    /**
+     * Creates an instance of the default game implementation.
+     */
+    public Memdial() {
+        super(25);
+        log().info("Memdial()");
+    }
 
     @Override
     public void init() {
+        log().info("init()");
+        // Create font King668
+        JavaPlatform platform = JavaPlatform.register();
+        platform.graphics().registerFont("King668", "fonts/King668.ttf");
+
         // create and add background image layer
         Image bgImage = assets().getImage("images/bg.png");
         ImageLayer bgLayer = graphics().createImageLayer(bgImage);
@@ -39,6 +54,8 @@ public class Memdial implements Game {
 
         // preload the pea image into the asset manager cache
         assets().getImage(Pea.IMAGE);
+        assets().getImage(Dial.IMAGE);
+        dial = new Dial(peaLayer, 320, 240, -1);
 
         // add a listener for pointer (mouse, touch) input
         pointer().setListener(new Pointer.Adapter() {
@@ -58,15 +75,11 @@ public class Memdial implements Game {
     }
 
     @Override
-    public void update(float delta) {
+    public void update(int delta) {
         for (Pea pea : peas) {
             pea.update(delta);
         }
-    }
-
-    @Override
-    public int updateRate() {
-        return 25;
+        dial.update(delta);
     }
 
 }
