@@ -22,7 +22,16 @@ import playn.java.JavaPlatform;
 public class MemdialJava {
 
     public static void main(String[] args) {
-        JavaPlatform platform = JavaPlatform.register();
+        configureScreen();
         PlayN.run(new Memdial());
     }
+
+    private static void configureScreen() {
+        JavaPlatform.Config config = new JavaPlatform.Config();
+        config.width = Memdial.SCREEN_WIDTH;
+        config.height = Memdial.SCREEN_HEIGHT;
+        JavaPlatform platform = JavaPlatform.register(config);
+        platform.graphics().registerFont("King668", "fonts/King668.ttf");
+    }
+
 }
