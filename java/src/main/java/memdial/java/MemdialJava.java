@@ -31,7 +31,7 @@ public class MemdialJava {
         config.width = Memdial.SCREEN_WIDTH;
         config.height = Memdial.SCREEN_HEIGHT;
         JavaPlatform platform = JavaPlatform.register(config);
-        platform.graphics().registerFont("King668", "fonts/King668.ttf");
+        platform.graphics().registerFont("king668", "fonts/king668.TTF");
     }
 
 }

@@ -18,6 +18,9 @@ package memdial.core;
 import playn.core.*;
 import playn.core.util.Callback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static playn.core.PlayN.*;
 
 public class Dial {
@@ -27,7 +30,30 @@ public class Dial {
     private float angle;
     private int index;
 
-    public Dial(final GroupLayer peaLayer, final float x, final float y, int index) {
+    private static List<Point> coords = new ArrayList<Point>();
+    static {
+        coords.add(new Point(389, 431));
+        coords.add(new Point(468, 296));
+        coords.add(new Point(446, 174));
+        coords.add(new Point(357, 88));
+        coords.add(new Point(238, 70));
+        coords.add(new Point(127, 120));
+        coords.add(new Point(65, 224));
+        coords.add(new Point(76, 347));
+        coords.add(new Point(155, 442));
+        coords.add(new Point(277, 476));
+    }
+
+    private static class Point {
+        Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+        int x;
+        int y;
+    }
+
+    public Dial(final GroupLayer parentLayer, final float x, final float y, int index) {
         Image image = assets().getImage(IMAGE);
         imageLayer = graphics().createImageLayer(image);
         this.index = index;
@@ -39,7 +65,7 @@ public class Dial {
             @Override
             public void onSuccess(Image result) {
                 imageLayer.setOrigin(result.width() / 2f, result.height() / 2f).setTranslation(x, y).setDepth(0);
-                peaLayer.add(imageLayer);
+                parentLayer.add(imageLayer);
             }
 
             @Override
@@ -48,9 +74,15 @@ public class Dial {
             }
         });
 
-        textLayer = createLayerWithText(Integer.toString(index) + ".");
+        textLayer = createLayerWithText("Dial\n666");
         textLayer.setOrigin(textLayer.width() / 2, textLayer.height() / 2).setTranslation(x, y).setDepth(1);
-        peaLayer.add(textLayer);
+        parentLayer.add(textLayer);
+
+        for (int ixNum = 0; ixNum < 10; ixNum++) {
+            ImageLayer numLayer = createLayerWithText(Integer.toString(ixNum));
+            numLayer.setOrigin(coords.get(ixNum).x, coords.get(ixNum).y).setTranslation(650, 550).setDepth(-1);
+            parentLayer.add(numLayer);
+        }
     }
 
     public void update(int delta) {
@@ -64,7 +96,7 @@ public class Dial {
     }
 
     private ImageLayer createLayerWithText(String text) {
-        Font font = graphics().createFont("King668", Font.Style.BOLD, 16f);
+        Font font = graphics().createFont("king668", Font.Style.PLAIN, 48f);
         TextFormat format = new TextFormat().withFont(font);
         TextLayout layout = graphics().layoutText(text, format);
         return createTextLayer(layout, 0xFF000000);

@@ -65,7 +65,7 @@ public class Pea {
     }
 
     private ImageLayer createLayerWithText(String text) {
-        Font font = graphics().createFont("Helvetica", Font.Style.BOLD, 16f);
+        Font font = graphics().createFont("king668", Font.Style.PLAIN, 24f);
         TextFormat format = new TextFormat().withFont(font);
         TextLayout layout = graphics().layoutText(text, format);
         return createTextLayer(layout, 0xFF000000);
