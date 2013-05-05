@@ -24,11 +24,13 @@ import java.util.List;
 import static playn.core.PlayN.*;
 
 public class Dial {
-    public static final String IMAGE = "images/dial-retro-hollow.png";
+    public static final String IMAGE = "images/dial-retro-cut.png";
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private float angle;
     private int index;
+    private int cntUpdates = 0;
+    private static final int MAX_UPDATES = 100;
 
     private static List<Point> coords = new ArrayList<Point>();
     static {
@@ -86,10 +88,15 @@ public class Dial {
     }
 
     public void update(int delta) {
-        if (index % 2 == 0) {
-            angle += 2 * Math.PI * 0.2 / delta;
-        } else {
-            angle -= 2 * Math.PI * 0.2 / delta;
+        if (cntUpdates++ < MAX_UPDATES) {
+            log().info("cntUpdates=" + cntUpdates);
+            float correctionFactor = 1 - (float) cntUpdates / MAX_UPDATES;
+            log().info("correctionFactor=" + delta);
+            if (index % 2 == 0) {
+                angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
+            } else {
+                angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
+            }
         }
         imageLayer.setRotation(angle);
         textLayer.setRotation(angle);
