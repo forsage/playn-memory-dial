@@ -17,9 +17,6 @@ package memdial.core;
 
 import playn.core.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static playn.core.PlayN.*;
 
 public class Memdial extends Game.Default {
@@ -28,8 +25,7 @@ public class Memdial extends Game.Default {
     public static final int SCREEN_WIDTH = 800;
     public static final int SCREEN_HEIGHT = 600;
 
-    GroupLayer peaLayer;
-    List<Pea> peas = new ArrayList<Pea>(0);
+    GroupLayer groupLayer;
     Dial dial;
 
     /**
@@ -47,20 +43,25 @@ public class Memdial extends Game.Default {
         graphics().rootLayer().add(bgLayer);
 
         // create a group layer to hold the peas
-        peaLayer = graphics().createGroupLayer();
-        graphics().rootLayer().add(peaLayer);
+        groupLayer = graphics().createGroupLayer();
+        graphics().rootLayer().add(groupLayer);
 
         // preload the pea image into the asset manager cache
         assets().getImage(Pea.IMAGE);
         assets().getImage(Dial.IMAGE);
-        dial = new Dial(peaLayer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, -1);
+        dial = new Dial(groupLayer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
         // add a listener for pointer (mouse, touch) input
         pointer().setListener(new Pointer.Adapter() {
             @Override
+            public void onPointerStart(Pointer.Event event) {
+                dial.setClockwise(true);
+            }
+
+            @Override
             public void onPointerEnd(Pointer.Event event) {
-                Pea pea = new Pea(peaLayer, event.x(), event.y(), peas.size());
-                peas.add(pea);
+                dial.setClockwise(false);
+                dial.setCntUpdates(0);
             }
         });
     }
@@ -74,9 +75,6 @@ public class Memdial extends Game.Default {
 
     @Override
     public void update(int delta) {
-        for (Pea pea : peas) {
-            pea.update(delta);
-        }
         dial.update(delta);
     }
 

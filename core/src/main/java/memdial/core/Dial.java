@@ -28,9 +28,9 @@ public class Dial {
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private float angle;
-    private int index;
     private int cntUpdates = 0;
-    private static final int MAX_UPDATES = 100;
+    public static final int MAX_UPDATES = 130;
+    private boolean clockwise = false;
 
     private static List<Point> coords = new ArrayList<Point>();
     static {
@@ -46,6 +46,22 @@ public class Dial {
         coords.add(new Point(277, 476));
     }
 
+    public boolean isClockwise() {
+        return clockwise;
+    }
+
+    public void setClockwise(boolean clockwise) {
+        this.clockwise = clockwise;
+    }
+
+    public int getCntUpdates() {
+        return cntUpdates;
+    }
+
+    public void setCntUpdates(int cntUpdates) {
+        this.cntUpdates = cntUpdates;
+    }
+
     private static class Point {
         Point(int x, int y) {
             this.x = x;
@@ -55,10 +71,9 @@ public class Dial {
         int y;
     }
 
-    public Dial(final GroupLayer parentLayer, final float x, final float y, int index) {
+    public Dial(final GroupLayer parentLayer, final float x, final float y) {
         Image image = assets().getImage(IMAGE);
         imageLayer = graphics().createImageLayer(image);
-        this.index = index;
 
         // Add a callback for when the image loads.
         // This is necessary because we can't use the width/height (to center the
@@ -89,10 +104,8 @@ public class Dial {
 
     public void update(int delta) {
         if (cntUpdates++ < MAX_UPDATES) {
-            log().info("cntUpdates=" + cntUpdates);
-            float correctionFactor = 1 - (float) cntUpdates / MAX_UPDATES;
-            log().info("correctionFactor=" + delta);
-            if (index % 2 == 0) {
+            float correctionFactor = 1 - (float) getCntUpdates() / MAX_UPDATES;
+            if (isClockwise()) {
                 angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
             } else {
                 angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
