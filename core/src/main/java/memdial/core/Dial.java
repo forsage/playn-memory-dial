@@ -28,8 +28,7 @@ public class Dial {
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private float angle;
-    private int cntUpdates = 0;
-    public static final int MAX_UPDATES = 130;
+    public static final double MAX_ANGLE = Math.PI;
     private boolean clockwise = false;
 
     private static List<Point> coords = new ArrayList<Point>();
@@ -54,12 +53,12 @@ public class Dial {
         this.clockwise = clockwise;
     }
 
-    public int getCntUpdates() {
-        return cntUpdates;
+    public float getAngle() {
+        return angle;
     }
 
-    public void setCntUpdates(int cntUpdates) {
-        this.cntUpdates = cntUpdates;
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     private static class Point {
@@ -103,16 +102,18 @@ public class Dial {
     }
 
     public void update(int delta) {
-        if (cntUpdates++ < MAX_UPDATES) {
-            float correctionFactor = 1 - (float) getCntUpdates() / MAX_UPDATES;
+        if (Math.abs(getAngle()) < Math.abs(MAX_ANGLE)) {
             if (isClockwise()) {
+                double correctionFactor = 1;
                 angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
             } else {
+                double correctionFactor = 1 - Math.abs(getAngle()) / Math.abs(MAX_ANGLE);
                 angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
             }
         }
-        imageLayer.setRotation(angle);
-        textLayer.setRotation(angle);
+        log().info("angle=" + getAngle() + " clockwise=" + clockwise);
+        imageLayer.setRotation(getAngle());
+        textLayer.setRotation(getAngle());
     }
 
     private ImageLayer createLayerWithText(String text) {
