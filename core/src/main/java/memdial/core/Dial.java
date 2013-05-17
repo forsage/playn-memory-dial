@@ -28,21 +28,21 @@ public class Dial {
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private float angle;
-    public static final double MAX_ANGLE = Math.PI;
+    public static final double MAX_ANGLE = 2 * Math.PI;
     private boolean clockwise = false;
 
     private static List<Point> coords = new ArrayList<Point>();
     static {
-        coords.add(new Point(389, 431));
-        coords.add(new Point(468, 296));
-        coords.add(new Point(446, 174));
-        coords.add(new Point(357, 88));
-        coords.add(new Point(238, 70));
-        coords.add(new Point(127, 120));
-        coords.add(new Point(65, 224));
-        coords.add(new Point(76, 347));
-        coords.add(new Point(155, 442));
-        coords.add(new Point(277, 476));
+        coords.add(new Point(412, 451));
+        coords.add(new Point(492, 307));
+        coords.add(new Point(468, 187));
+        coords.add(new Point(379, 101));
+        coords.add(new Point(260, 82));
+        coords.add(new Point(149, 140));
+        coords.add(new Point(93, 244));
+        coords.add(new Point(99, 366));
+        coords.add(new Point(172, 451));
+        coords.add(new Point(290, 492));
     }
 
     public boolean isClockwise() {
@@ -51,14 +51,6 @@ public class Dial {
 
     public void setClockwise(boolean clockwise) {
         this.clockwise = clockwise;
-    }
-
-    public float getAngle() {
-        return angle;
-    }
-
-    public void setAngle(float angle) {
-        this.angle = angle;
     }
 
     private static class Point {
@@ -96,24 +88,27 @@ public class Dial {
 
         for (int ixNum = 0; ixNum < 10; ixNum++) {
             ImageLayer numLayer = createLayerWithText(Integer.toString(ixNum));
-            numLayer.setOrigin(coords.get(ixNum).x, coords.get(ixNum).y).setTranslation(650, 550).setDepth(-1);
+            numLayer.setOrigin(Memdial.SCREEN_WIDTH - coords.get(ixNum).x, Memdial.SCREEN_HEIGHT - coords.get(ixNum).y).
+                    setTranslation(Memdial.SCREEN_WIDTH + 100, Memdial.SCREEN_HEIGHT - 12).
+                    setDepth(-1);
             parentLayer.add(numLayer);
         }
     }
 
     public void update(int delta) {
-        if (Math.abs(getAngle()) < Math.abs(MAX_ANGLE)) {
+        log().info("update(delta=" + delta + ")");
+        log().info("    angle=" + angle);
+        if (Math.abs(angle) < Math.abs(MAX_ANGLE)) {
             if (isClockwise()) {
                 double correctionFactor = 1;
                 angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
             } else {
-                double correctionFactor = 1 - Math.abs(getAngle()) / Math.abs(MAX_ANGLE);
+                double correctionFactor = 1 - Math.abs(angle) / Math.abs(MAX_ANGLE);
                 angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
             }
         }
-        log().info("angle=" + getAngle() + " clockwise=" + clockwise);
-        imageLayer.setRotation(getAngle());
-        textLayer.setRotation(getAngle());
+        imageLayer.setRotation(angle);
+        textLayer.setRotation(angle);
     }
 
     private ImageLayer createLayerWithText(String text) {

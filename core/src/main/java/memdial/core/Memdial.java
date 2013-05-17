@@ -61,7 +61,6 @@ public class Memdial extends Game.Default {
             @Override
             public void onPointerEnd(Pointer.Event event) {
                 dial.setClockwise(false);
-                dial.setAngle(0);
             }
         });
     }
