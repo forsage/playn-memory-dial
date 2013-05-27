@@ -28,7 +28,7 @@ public class Dial {
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private float angle;
-    public static final double MAX_ANGLE = 2 * Math.PI;
+    public static final double MIN_ANGLE = -2 * Math.PI;
     private boolean clockwise = false;
 
     private static List<Point> coords = new ArrayList<Point>();
@@ -98,13 +98,19 @@ public class Dial {
     public void update(int delta) {
         log().info("update(delta=" + delta + ")");
         log().info("    angle=" + angle);
-        if (Math.abs(angle) < Math.abs(MAX_ANGLE)) {
+        if (angle <= 0 && angle >= MIN_ANGLE) {
             if (isClockwise()) {
                 double correctionFactor = 1;
                 angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
+                if (angle > 0) {
+                    angle = 0;
+                }
             } else {
-                double correctionFactor = 1 - Math.abs(angle) / Math.abs(MAX_ANGLE);
+                double correctionFactor = 1 - Math.abs(angle) / Math.abs(MIN_ANGLE);
                 angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
+                if (angle < MIN_ANGLE) {
+                    angle = new Double(MIN_ANGLE).floatValue();
+                }
             }
         }
         imageLayer.setRotation(angle);
