@@ -25,24 +25,44 @@ import static playn.core.PlayN.*;
 
 public class Dial {
     public static final String IMAGE = "images/dial-retro-cut.png";
+    private GroupLayer parentLayer;
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
+    private ImageLayer dialledNumbersLayer;
     private float angle;
     public static final double MIN_ANGLE = -2 * Math.PI;
+    private static final double SPEED_CW = 0.4;
+    private static final double SPEED_CCW = 0.2;
     private boolean clockwise = false;
+    static final TextFormat TEXT_FORMAT = new TextFormat().withFont(graphics().createFont("king668", Font.Style.PLAIN, 48f));
+    String numbersDialled = "";
 
-    private static List<Point> coords = new ArrayList<Point>();
+    private static List<Point> NUMBER_COORDS = new ArrayList<Point>();
     static {
-        coords.add(new Point(412, 451));
-        coords.add(new Point(492, 307));
-        coords.add(new Point(468, 187));
-        coords.add(new Point(379, 101));
-        coords.add(new Point(260, 82));
-        coords.add(new Point(149, 140));
-        coords.add(new Point(93, 244));
-        coords.add(new Point(99, 366));
-        coords.add(new Point(172, 451));
-        coords.add(new Point(290, 492));
+        NUMBER_COORDS.add(new Point(412, 451));
+        NUMBER_COORDS.add(new Point(492, 307));
+        NUMBER_COORDS.add(new Point(468, 187));
+        NUMBER_COORDS.add(new Point(379, 101));
+        NUMBER_COORDS.add(new Point(260, 82));
+        NUMBER_COORDS.add(new Point(149, 140));
+        NUMBER_COORDS.add(new Point(93, 244));
+        NUMBER_COORDS.add(new Point(99, 366));
+        NUMBER_COORDS.add(new Point(172, 451));
+        NUMBER_COORDS.add(new Point(290, 492));
+    }
+
+    private static List<Double> NUMBER_ANGLES = new ArrayList<Double>();
+    static {
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.1);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.2);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.3);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.4);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.5);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.6);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.7);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.8);
+        NUMBER_ANGLES.add(-2 * Math.PI * 0.9);
+        NUMBER_ANGLES.add(-2 * Math.PI * 1);
     }
 
     public boolean isClockwise() {
@@ -88,26 +108,28 @@ public class Dial {
 
         for (int ixNum = 0; ixNum < 10; ixNum++) {
             ImageLayer numLayer = createLayerWithText(Integer.toString(ixNum));
-            numLayer.setOrigin(Memdial.SCREEN_WIDTH - coords.get(ixNum).x, Memdial.SCREEN_HEIGHT - coords.get(ixNum).y).
+            numLayer.setOrigin(Memdial.SCREEN_WIDTH - NUMBER_COORDS.get(ixNum).x, Memdial.SCREEN_HEIGHT - NUMBER_COORDS.get(ixNum).y).
                     setTranslation(Memdial.SCREEN_WIDTH + 100, Memdial.SCREEN_HEIGHT - 12).
                     setDepth(-1);
             parentLayer.add(numLayer);
         }
+
+        dialledNumbersLayer = createLayerWithText("Dialled");
+        parentLayer.add(dialledNumbersLayer);
+        this.parentLayer = parentLayer;
     }
 
     public void update(int delta) {
-        log().info("update(delta=" + delta + ")");
-        log().info("    angle=" + angle);
         if (angle <= 0 && angle >= MIN_ANGLE) {
             if (isClockwise()) {
                 double correctionFactor = 1;
-                angle += correctionFactor * 2 * Math.PI * 0.2 / delta;
+                angle += correctionFactor * 2 * Math.PI * SPEED_CW / delta;
                 if (angle > 0) {
                     angle = 0;
                 }
             } else {
                 double correctionFactor = 1 - Math.abs(angle) / Math.abs(MIN_ANGLE);
-                angle -= correctionFactor * 2 * Math.PI * 0.2 / delta;
+                angle -= correctionFactor * 2 * Math.PI * SPEED_CCW / delta;
                 if (angle < MIN_ANGLE) {
                     angle = new Double(MIN_ANGLE).floatValue();
                 }
@@ -117,10 +139,26 @@ public class Dial {
         textLayer.setRotation(angle);
     }
 
+    public void writeDialledNumber() {
+        parentLayer.remove(dialledNumbersLayer);
+        dialledNumbersLayer = createLayerWithText("Dialled: " + findNumbersDialled(angle));
+        parentLayer.add(dialledNumbersLayer);
+    }
+
+    private String findNumbersDialled(float angle) {
+        int numberDialled = -1;
+        for (int ixDialled = 0; ixDialled < NUMBER_ANGLES.size(); ixDialled++) {
+            if (NUMBER_ANGLES.get(ixDialled) < angle) {
+                numberDialled = ixDialled;
+                break;
+            }
+        }
+        numbersDialled += numberDialled;
+        return numbersDialled;
+    }
+
     private ImageLayer createLayerWithText(String text) {
-        Font font = graphics().createFont("king668", Font.Style.PLAIN, 48f);
-        TextFormat format = new TextFormat().withFont(font);
-        TextLayout layout = graphics().layoutText(text, format);
+        TextLayout layout = graphics().layoutText(text, Dial.TEXT_FORMAT);
         return createTextLayer(layout, 0xFF000000);
     }
 
