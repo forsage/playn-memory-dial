@@ -64,6 +64,18 @@ public class Memdial extends Game.Default {
                 dial.writeDialledNumber();
             }
         });
+
+        keyboard().setListener(new Keyboard.Adapter() {
+            @Override
+            public void onKeyTyped(Keyboard.TypedEvent event) {
+                if (event.typedChar() == 'q') {
+                    System.exit(0);
+                }
+                if ((Character.getNumericValue(event.typedChar()) >= 0) && (Character.getNumericValue(event.typedChar()) < 10)) {
+                    dial.dialNumber(Character.getNumericValue(event.typedChar()));
+                }
+            }
+        });
     }
 
     @Override

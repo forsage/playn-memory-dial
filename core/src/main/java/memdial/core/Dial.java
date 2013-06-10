@@ -114,7 +114,7 @@ public class Dial {
             parentLayer.add(numLayer);
         }
 
-        dialledNumbersLayer = createLayerWithText("Dialled");
+        dialledNumbersLayer = createLayerWithText("Press key or click to dial");
         parentLayer.add(dialledNumbersLayer);
         this.parentLayer = parentLayer;
     }
@@ -139,9 +139,16 @@ public class Dial {
         textLayer.setRotation(angle);
     }
 
+    public void dialNumber(int numberDialled) {
+        numbersDialled += numberDialled;
+        parentLayer.remove(dialledNumbersLayer);
+        dialledNumbersLayer = createLayerWithText(numbersDialled);
+        parentLayer.add(dialledNumbersLayer);
+    }
+
     public void writeDialledNumber() {
         parentLayer.remove(dialledNumbersLayer);
-        dialledNumbersLayer = createLayerWithText("Dialled: " + findNumbersDialled(angle));
+        dialledNumbersLayer = createLayerWithText(findNumbersDialled(angle));
         parentLayer.add(dialledNumbersLayer);
     }
 
