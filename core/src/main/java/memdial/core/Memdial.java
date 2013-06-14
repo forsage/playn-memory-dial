@@ -55,13 +55,18 @@ public class Memdial extends Game.Default {
         pointer().setListener(new Pointer.Adapter() {
             @Override
             public void onPointerStart(Pointer.Event event) {
-                dial.setClockwise(true);
+                if ((!dial.isClockwise())&& (!dial.isDialling())) {
+                    dial.setClockwise(true);
+                    dial.beginDialling();
+                }
             }
 
             @Override
             public void onPointerEnd(Pointer.Event event) {
-                dial.setClockwise(false);
-                dial.writeDialledNumber();
+                if (dial.isClockwise()) {
+                    dial.setClockwise(false);
+                    dial.writeDialledNumber();
+                }
             }
         });
 
@@ -70,8 +75,18 @@ public class Memdial extends Game.Default {
             public void onKeyTyped(Keyboard.TypedEvent event) {
                 if (event.typedChar() == 'q') {
                     System.exit(0);
+                } else if (event.typedChar() == 'p') {
+                    if (dial.isPlaying()) {
+                        dial.pause();
+                    } else {
+                        dial.play();
+                    }
                 }
-                if ((Character.getNumericValue(event.typedChar()) >= 0) && (Character.getNumericValue(event.typedChar()) < 10)) {
+
+                if ((Character.getNumericValue(event.typedChar()) >= 0)
+                        && (Character.getNumericValue(event.typedChar()) < 10)
+                        && (!dial.isClockwise())
+                        && (!dial.isDialling())) {
                     dial.dialNumber(Character.getNumericValue(event.typedChar()));
                 }
             }

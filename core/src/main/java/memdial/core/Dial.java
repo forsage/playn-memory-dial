@@ -29,13 +29,16 @@ public class Dial {
     private ImageLayer imageLayer;
     private ImageLayer textLayer;
     private ImageLayer dialledNumbersLayer;
+    private ImageLayer pausedLayer;
     private float angle;
     public static final double MIN_ANGLE = -2 * Math.PI;
+    private static final double EPS_ANGLE = 0.02;
     private static final double SPEED_CW = 0.4;
-    private static final double SPEED_CCW = 0.2;
+    private static final double SPEED_CCW = 0.4;
     private boolean clockwise = false;
     static final TextFormat TEXT_FORMAT = new TextFormat().withFont(graphics().createFont("king668", Font.Style.PLAIN, 48f));
     String numbersDialled = "";
+    private static int SPLASH_SCREEN_TICKS = 2 * Memdial.UPDATE_RATE;
 
     private static List<Point> NUMBER_COORDS = new ArrayList<Point>();
     static {
@@ -65,12 +68,46 @@ public class Dial {
         NUMBER_ANGLES.add(-2 * Math.PI * 1);
     }
 
+    private boolean playing = true;
+
     public boolean isClockwise() {
         return clockwise;
     }
 
     public void setClockwise(boolean clockwise) {
         this.clockwise = clockwise;
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    private void setPlaying(boolean playing) {
+        this.playing = playing;
+    }
+
+    public void play() {
+        setPlaying(true);
+        drawPlaying();
+    }
+
+    public void pause() {
+        setPlaying(false);
+        drawPaused();
+    }
+
+    private void drawPaused() {
+        pausedLayer = createLayerWithText("PAUSED", 0xFFFF0000);
+        pausedLayer.setTranslation(620, 0);
+        parentLayer.add(pausedLayer);
+    }
+
+    private void drawPlaying() {
+        parentLayer.remove(pausedLayer);
+    }
+
+    public void beginDialling() {
+        angle = new Double(MIN_ANGLE + EPS_ANGLE).floatValue();
     }
 
     private static class Point {
@@ -120,6 +157,17 @@ public class Dial {
     }
 
     public void update(int delta) {
+        removeSplashScreen();
+        if (isPlaying()) {
+            rotateDial(delta);
+        }
+    }
+
+    public boolean isDialling() {
+        return angle > MIN_ANGLE;
+    }
+
+    private void rotateDial(int delta) {
         if (angle <= 0 && angle >= MIN_ANGLE) {
             if (isClockwise()) {
                 double correctionFactor = 1;
@@ -130,7 +178,7 @@ public class Dial {
             } else {
                 double correctionFactor = 1 - Math.abs(angle) / Math.abs(MIN_ANGLE);
                 angle -= correctionFactor * 2 * Math.PI * SPEED_CCW / delta;
-                if (angle < MIN_ANGLE) {
+                if (angle < MIN_ANGLE + EPS_ANGLE) {
                     angle = new Double(MIN_ANGLE).floatValue();
                 }
             }
@@ -139,11 +187,23 @@ public class Dial {
         textLayer.setRotation(angle);
     }
 
+    private void removeSplashScreen() {
+        if (SPLASH_SCREEN_TICKS == 0) {
+            parentLayer.remove(dialledNumbersLayer);
+            dialledNumbersLayer = createLayerWithText("");
+            parentLayer.add(dialledNumbersLayer);
+            SPLASH_SCREEN_TICKS = -1;
+        } else if (SPLASH_SCREEN_TICKS > 0) {
+            SPLASH_SCREEN_TICKS--;
+        }
+    }
+
     public void dialNumber(int numberDialled) {
         numbersDialled += numberDialled;
         parentLayer.remove(dialledNumbersLayer);
         dialledNumbersLayer = createLayerWithText(numbersDialled);
         parentLayer.add(dialledNumbersLayer);
+        beginDialling();
     }
 
     public void writeDialledNumber() {
@@ -155,7 +215,7 @@ public class Dial {
     private String findNumbersDialled(float angle) {
         int numberDialled = -1;
         for (int ixDialled = 0; ixDialled < NUMBER_ANGLES.size(); ixDialled++) {
-            if (NUMBER_ANGLES.get(ixDialled) < angle) {
+            if (NUMBER_ANGLES.get(ixDialled) <= angle) {
                 numberDialled = ixDialled;
                 break;
             }
@@ -164,9 +224,13 @@ public class Dial {
         return numbersDialled;
     }
 
-    private ImageLayer createLayerWithText(String text) {
+    private ImageLayer createLayerWithText(String text, int color) {
         TextLayout layout = graphics().layoutText(text, Dial.TEXT_FORMAT);
-        return createTextLayer(layout, 0xFF000000);
+        return createTextLayer(layout, color);
+    }
+
+    private ImageLayer createLayerWithText(String text) {
+        return createLayerWithText(text, 0xFF000000);
     }
 
     protected ImageLayer createTextLayer(TextLayout layout, int color) {
