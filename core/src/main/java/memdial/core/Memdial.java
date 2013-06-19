@@ -88,6 +88,9 @@ public class Memdial extends Game.Default {
                         && (!dial.isClockwise())
                         && (!dial.isDialling())) {
                     dial.dialNumber(Character.getNumericValue(event.typedChar()));
+                    dial.setClockwise(true);
+                    dial.beginDialling();
+                    dial.setNumberDialling(Character.getNumericValue(event.typedChar()));
                 }
             }
         });

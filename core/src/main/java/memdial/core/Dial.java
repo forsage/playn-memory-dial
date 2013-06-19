@@ -39,6 +39,7 @@ public class Dial {
     static final TextFormat TEXT_FORMAT = new TextFormat().withFont(graphics().createFont("king668", Font.Style.PLAIN, 48f));
     String numbersDialled = "";
     private static int SPLASH_SCREEN_TICKS = 2 * Memdial.UPDATE_RATE;
+    private int numberDialling = -1;
 
     private static List<Point> NUMBER_COORDS = new ArrayList<Point>();
     static {
@@ -110,6 +111,14 @@ public class Dial {
         angle = new Double(MIN_ANGLE + EPS_ANGLE).floatValue();
     }
 
+    public int getNumberDialling() {
+        return numberDialling;
+    }
+
+    public void setNumberDialling(int numberDialling) {
+        this.numberDialling = numberDialling;
+    }
+
     private static class Point {
         Point(int x, int y) {
             this.x = x;
@@ -175,10 +184,16 @@ public class Dial {
                 if (angle > 0) {
                     angle = 0;
                 }
+                if (getNumberDialling() > -1) {
+                    if (findNumberDialled(angle) == getNumberDialling()) {
+                        setClockwise(false);
+                    }
+                }
             } else {
                 double correctionFactor = 1 - Math.abs(angle) / Math.abs(MIN_ANGLE);
                 angle -= correctionFactor * 2 * Math.PI * SPEED_CCW / delta;
                 if (angle < MIN_ANGLE + EPS_ANGLE) {
+                    setNumberDialling(-1);
                     angle = new Double(MIN_ANGLE).floatValue();
                 }
             }
@@ -203,7 +218,6 @@ public class Dial {
         parentLayer.remove(dialledNumbersLayer);
         dialledNumbersLayer = createLayerWithText(numbersDialled);
         parentLayer.add(dialledNumbersLayer);
-        beginDialling();
     }
 
     public void writeDialledNumber() {
@@ -213,6 +227,12 @@ public class Dial {
     }
 
     private String findNumbersDialled(float angle) {
+        int numberDialled = findNumberDialled(angle);
+        numbersDialled += numberDialled;
+        return numbersDialled;
+    }
+
+    private int findNumberDialled(float angle) {
         int numberDialled = -1;
         for (int ixDialled = 0; ixDialled < NUMBER_ANGLES.size(); ixDialled++) {
             if (NUMBER_ANGLES.get(ixDialled) <= angle) {
@@ -220,8 +240,7 @@ public class Dial {
                 break;
             }
         }
-        numbersDialled += numberDialled;
-        return numbersDialled;
+        return numberDialled;
     }
 
     private ImageLayer createLayerWithText(String text, int color) {
