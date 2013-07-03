@@ -18,8 +18,7 @@ package memdial.core;
 import playn.core.*;
 import playn.core.util.Callback;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static playn.core.PlayN.*;
 
@@ -41,7 +40,7 @@ public class Dial {
     private static int SPLASH_SCREEN_TICKS = 2 * Memdial.UPDATE_RATE;
     private int numberDialling = -1;
 
-    private static List<Point> NUMBER_COORDS = new ArrayList<Point>();
+    private static final List<Point> NUMBER_COORDS = new ArrayList<Point>();
     static {
         NUMBER_COORDS.add(new Point(412, 451));
         NUMBER_COORDS.add(new Point(492, 307));
@@ -55,18 +54,18 @@ public class Dial {
         NUMBER_COORDS.add(new Point(290, 492));
     }
 
-    private static List<Double> NUMBER_ANGLES = new ArrayList<Double>();
+    private static final Map<Integer, Double> NUMBER_ANGLES = new TreeMap<Integer, Double>();
     static {
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.1);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.2);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.3);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.4);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.5);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.6);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.7);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.8);
-        NUMBER_ANGLES.add(-2 * Math.PI * 0.9);
-        NUMBER_ANGLES.add(-2 * Math.PI * 1);
+        NUMBER_ANGLES.put(0, -2 * Math.PI * 0.133); // 0 --> -48
+        NUMBER_ANGLES.put(9, -2 * Math.PI * 0.233); // 9 --> -84
+        NUMBER_ANGLES.put(8, -2 * Math.PI * 0.328); // 8 --> -118
+        NUMBER_ANGLES.put(7, -2 * Math.PI * 0.425); // 7 --> -153
+        NUMBER_ANGLES.put(6, -2 * Math.PI * 0.525); // 6 --> 171
+        NUMBER_ANGLES.put(5, -2 * Math.PI * 0.617); // 5 --> 138
+        NUMBER_ANGLES.put(4, -2 * Math.PI * 0.711); // 4 --> 104
+        NUMBER_ANGLES.put(3, -2 * Math.PI * 0.806); // 3 --> 70
+        NUMBER_ANGLES.put(2, -2 * Math.PI * 0.9); // 2 --> 36
+        NUMBER_ANGLES.put(1, -2 * Math.PI * 1);   // 1 --> 0
     }
 
     private boolean playing = true;
@@ -232,11 +231,19 @@ public class Dial {
         return numbersDialled;
     }
 
-    private int findNumberDialled(float angle) {
+    private int findNumberDialled(float dialledAngle) {
         int numberDialled = -1;
-        for (int ixDialled = 0; ixDialled < NUMBER_ANGLES.size(); ixDialled++) {
-            if (NUMBER_ANGLES.get(ixDialled) <= angle) {
-                numberDialled = ixDialled;
+        List<Map.Entry<Integer, Double>> dialAngles = new ArrayList<Map.Entry<Integer, Double>>(NUMBER_ANGLES.entrySet());
+        Comparator<Map.Entry<Integer, Double>> invertAnglesComparator = new Comparator<Map.Entry<Integer, Double>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
+                return -1 * e1.getValue().compareTo(e2.getValue());
+            }
+        };
+        Collections.sort(dialAngles, invertAnglesComparator);
+        for (Map.Entry<Integer, Double> dialAngle : dialAngles) {
+            if (dialAngle.getValue() <= dialledAngle) {
+                numberDialled = dialAngle.getKey();
                 break;
             }
         }
