@@ -47,7 +47,6 @@ public class Memdial extends Game.Default {
         graphics().rootLayer().add(groupLayer);
 
         // preload the pea image into the asset manager cache
-        assets().getImage(Pea.IMAGE);
         assets().getImage(Dial.IMAGE);
         dial = new Dial(groupLayer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
@@ -55,7 +54,7 @@ public class Memdial extends Game.Default {
         pointer().setListener(new Pointer.Adapter() {
             @Override
             public void onPointerStart(Pointer.Event event) {
-                if ((!dial.isClockwise())&& (!dial.isDialling())) {
+                if ((!dial.isClockwise()) && (!dial.isDialling())) {
                     dial.setClockwise(true);
                     dial.beginDialling();
                 }
@@ -65,7 +64,7 @@ public class Memdial extends Game.Default {
             public void onPointerEnd(Pointer.Event event) {
                 if (dial.isClockwise()) {
                     dial.setClockwise(false);
-                    dial.writeDialledNumber();
+                    dial.dialNumberMouse();
                 }
             }
         });
@@ -87,7 +86,7 @@ public class Memdial extends Game.Default {
                         && (Character.getNumericValue(event.typedChar()) < 10)
                         && (!dial.isClockwise())
                         && (!dial.isDialling())) {
-                    dial.dialNumber(Character.getNumericValue(event.typedChar()));
+                    dial.dialNumberKeyboard(Character.getNumericValue(event.typedChar()));
                     dial.setClockwise(true);
                     dial.beginDialling();
                     dial.setNumberDialling(Character.getNumericValue(event.typedChar()));

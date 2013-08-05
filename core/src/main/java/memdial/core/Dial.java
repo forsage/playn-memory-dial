@@ -34,13 +34,16 @@ public class Dial {
     private static final double EPS_ANGLE = 0.02;
     private static final double SPEED_CW = 0.4;
     private static final double SPEED_CCW = 0.4;
+    private static final int SPACE_BETWEEN_CHARS = 3;
     private boolean clockwise = false;
-    static final TextFormat TEXT_FORMAT = new TextFormat().withFont(graphics().createFont("king668", Font.Style.PLAIN, 48f));
-    String numbersDialled = "";
+    static final TextFormat TEXT_FORMAT = new TextFormat().withFont(graphics().createFont("king668", Font.Style.PLAIN, 48f)).withAlignment(TextFormat.Alignment.LEFT);
+    List<String> numbersDialled = new ArrayList<String>();
+    List<Integer> colorsOfNumbersDialled = new ArrayList<Integer>();
     private static int SPLASH_SCREEN_TICKS = 2 * Memdial.UPDATE_RATE;
     private int numberDialling = -1;
 
     private static final List<Point> NUMBER_COORDS = new ArrayList<Point>();
+
     static {
         NUMBER_COORDS.add(new Point(412, 451));
         NUMBER_COORDS.add(new Point(492, 307));
@@ -54,18 +57,19 @@ public class Dial {
         NUMBER_COORDS.add(new Point(290, 492));
     }
 
-    private static final Map<Integer, Double> NUMBER_ANGLES = new TreeMap<Integer, Double>();
+    private static final Map<Integer, Double> DIAL_ANGLES = new TreeMap<Integer, Double>();
+
     static {
-        NUMBER_ANGLES.put(0, -2 * Math.PI * 0.133); // 0 --> -48
-        NUMBER_ANGLES.put(9, -2 * Math.PI * 0.233); // 9 --> -84
-        NUMBER_ANGLES.put(8, -2 * Math.PI * 0.328); // 8 --> -118
-        NUMBER_ANGLES.put(7, -2 * Math.PI * 0.425); // 7 --> -153
-        NUMBER_ANGLES.put(6, -2 * Math.PI * 0.525); // 6 --> 171
-        NUMBER_ANGLES.put(5, -2 * Math.PI * 0.617); // 5 --> 138
-        NUMBER_ANGLES.put(4, -2 * Math.PI * 0.711); // 4 --> 104
-        NUMBER_ANGLES.put(3, -2 * Math.PI * 0.806); // 3 --> 70
-        NUMBER_ANGLES.put(2, -2 * Math.PI * 0.9); // 2 --> 36
-        NUMBER_ANGLES.put(1, -2 * Math.PI * 1);   // 1 --> 0
+        DIAL_ANGLES.put(0, -2 * Math.PI * 0.133);
+        DIAL_ANGLES.put(9, -2 * Math.PI * 0.233);
+        DIAL_ANGLES.put(8, -2 * Math.PI * 0.328);
+        DIAL_ANGLES.put(7, -2 * Math.PI * 0.425);
+        DIAL_ANGLES.put(6, -2 * Math.PI * 0.525);
+        DIAL_ANGLES.put(5, -2 * Math.PI * 0.617);
+        DIAL_ANGLES.put(4, -2 * Math.PI * 0.711);
+        DIAL_ANGLES.put(3, -2 * Math.PI * 0.806);
+        DIAL_ANGLES.put(2, -2 * Math.PI * 0.9);
+        DIAL_ANGLES.put(1, -2 * Math.PI * 1);
     }
 
     private boolean playing = true;
@@ -97,8 +101,8 @@ public class Dial {
     }
 
     private void drawPaused() {
-        pausedLayer = createLayerWithText("PAUSED", 0xFFFF0000);
-        pausedLayer.setTranslation(620, 0);
+        pausedLayer = createLayerWithTexts(new String[]{"P", "A", "U", "S", "E", "D"}, new Integer[]{0xFFFF0000, 0xFFCC0000, 0xFF990000, 0xFF660000, 0xFF330000, 0xFF000000});
+        pausedLayer.setTranslation(600, 0);
         parentLayer.add(pausedLayer);
     }
 
@@ -123,6 +127,7 @@ public class Dial {
             this.x = x;
             this.y = y;
         }
+
         int x;
         int y;
     }
@@ -152,7 +157,7 @@ public class Dial {
         parentLayer.add(textLayer);
 
         for (int ixNum = 0; ixNum < 10; ixNum++) {
-            ImageLayer numLayer = createLayerWithText(Integer.toString(ixNum));
+            ImageLayer numLayer = createLayerWithText(Integer.toString(ixNum), getColorRedForAngle(DIAL_ANGLES.get(ixNum).floatValue()));
             numLayer.setOrigin(Memdial.SCREEN_WIDTH - NUMBER_COORDS.get(ixNum).x, Memdial.SCREEN_HEIGHT - NUMBER_COORDS.get(ixNum).y).
                     setTranslation(Memdial.SCREEN_WIDTH + 100, Memdial.SCREEN_HEIGHT - 12).
                     setDepth(-1);
@@ -208,32 +213,38 @@ public class Dial {
             parentLayer.add(dialledNumbersLayer);
             SPLASH_SCREEN_TICKS = -1;
         } else if (SPLASH_SCREEN_TICKS > 0) {
-            SPLASH_SCREEN_TICKS--;
+            --SPLASH_SCREEN_TICKS;
         }
     }
 
-    public void dialNumber(int numberDialled) {
-        numbersDialled += numberDialled;
+    public void dialNumberKeyboard(int numberDialled) {
         parentLayer.remove(dialledNumbersLayer);
-        dialledNumbersLayer = createLayerWithText(numbersDialled);
+        numbersDialled.add(Integer.toString(numberDialled));
+        String[] arrayNumbersDialled = new String[numbersDialled.size()];
+        arrayNumbersDialled = numbersDialled.toArray(arrayNumbersDialled);
+        colorsOfNumbersDialled.add(getColorRedForDigit(numberDialled));
+        Integer[] arrayColors = new Integer[colorsOfNumbersDialled.size()];
+        arrayColors = colorsOfNumbersDialled.toArray(arrayColors);
+        dialledNumbersLayer = createLayerWithTexts(arrayNumbersDialled, arrayColors);
         parentLayer.add(dialledNumbersLayer);
     }
 
-    public void writeDialledNumber() {
-        parentLayer.remove(dialledNumbersLayer);
-        dialledNumbersLayer = createLayerWithText(findNumbersDialled(angle));
-        parentLayer.add(dialledNumbersLayer);
+    public void dialNumberMouse() {
+        dialNumberKeyboard(findNumberDialled(angle));
     }
 
-    private String findNumbersDialled(float angle) {
-        int numberDialled = findNumberDialled(angle);
-        numbersDialled += numberDialled;
-        return numbersDialled;
+    private int getColorRedForAngle(float angle) {
+        int colorRed = (int) (-255 * Math.abs(angle / MIN_ANGLE) - 1);
+        return 0xFF000000 + colorRed * 65536;
+    }
+
+    private int getColorRedForDigit(int digit) {
+        return getColorRedForAngle(DIAL_ANGLES.get(digit).floatValue());
     }
 
     private int findNumberDialled(float dialledAngle) {
         int numberDialled = -1;
-        List<Map.Entry<Integer, Double>> dialAngles = new ArrayList<Map.Entry<Integer, Double>>(NUMBER_ANGLES.entrySet());
+        List<Map.Entry<Integer, Double>> dialAngles = new ArrayList<Map.Entry<Integer, Double>>(DIAL_ANGLES.entrySet());
         Comparator<Map.Entry<Integer, Double>> invertAnglesComparator = new Comparator<Map.Entry<Integer, Double>>() {
             @Override
             public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
@@ -255,15 +266,43 @@ public class Dial {
         return createTextLayer(layout, color);
     }
 
+    private ImageLayer createLayerWithTexts(String[] texts, Integer[] colors) {
+        TextLayout[] layouts = new TextLayout[texts.length];
+        for (int ixText = 0; ixText < texts.length; ixText++) {
+            layouts[ixText] = graphics().layoutText(texts[ixText], Dial.TEXT_FORMAT);
+        }
+        return createTextLayer(layouts, colors);
+    }
+
     private ImageLayer createLayerWithText(String text) {
         return createLayerWithText(text, 0xFF000000);
     }
 
     protected ImageLayer createTextLayer(TextLayout layout, int color) {
-        CanvasImage image = graphics().createImage((int)Math.ceil(layout.width()),
-                (int)Math.ceil(layout.height()));
+        CanvasImage image = graphics().createImage((int) Math.ceil(layout.width()),
+                (int) Math.ceil(layout.height()));
         image.canvas().setFillColor(color);
         image.canvas().fillText(layout, 0, 0);
+        return graphics().createImageLayer(image);
+    }
+
+    protected ImageLayer createTextLayer(TextLayout[] layouts, Integer[] colors) {
+        int wLayout = 0;
+        int hLayout = 0;
+        for (TextLayout layout : layouts) {
+            wLayout += layout.width() + SPACE_BETWEEN_CHARS;
+            hLayout += layout.height();
+        }
+        CanvasImage image = graphics().createImage((int) Math.ceil(wLayout) + SPACE_BETWEEN_CHARS,
+                (int) Math.ceil(hLayout));
+        wLayout = 0;
+        hLayout = 0;
+        int ixLayout = 0;
+        for (TextLayout layout : layouts) {
+            image.canvas().setFillColor(colors[ixLayout++]);
+            image.canvas().fillText(layout, wLayout, hLayout);
+            wLayout += layout.width() + SPACE_BETWEEN_CHARS;
+        }
         return graphics().createImageLayer(image);
     }
 }
