@@ -73,6 +73,7 @@ public class Dial {
     }
 
     private boolean playing = true;
+    private int cntTicks = 1;
 
     public boolean isClockwise() {
         return clockwise;
@@ -194,8 +195,16 @@ public class Dial {
                     }
                 }
             } else {
-                double correctionFactor = 1 - Math.abs(angle) / Math.abs(MIN_ANGLE);
-                angle -= correctionFactor * 2 * Math.PI * SPEED_CCW / delta;
+                double angleRatio = Math.abs(angle) / Math.abs(MIN_ANGLE);
+                double correctionFactor = 1 - (angleRatio * angleRatio);
+                double deltaRadians = correctionFactor * 2 * Math.PI * SPEED_CCW / delta;
+                if (cntTicks > 0 && shouldTick(angle, deltaRadians)) {
+                    angle += deltaRadians / 2;
+                    cntTicks--;
+                } else {
+                    cntTicks = 1;
+                    angle -= deltaRadians;
+                }
                 if (angle < MIN_ANGLE + EPS_ANGLE) {
                     setNumberDialling(-1);
                     angle = new Double(MIN_ANGLE).floatValue();
@@ -204,6 +213,22 @@ public class Dial {
         }
         imageLayer.setRotation(angle);
         textLayer.setRotation(angle);
+    }
+
+    private boolean shouldTick(float angle, double deltaRadians) {
+        List<Double> anglesToTick = new ArrayList<Double>(DIAL_ANGLES.values());
+        Collections.sort(anglesToTick, new Comparator<Double>() {
+            @Override
+            public int compare(Double a1, Double a2) {
+                return -1 * a1.compareTo(a2);
+            }
+        });
+        for (Double angleToTick : anglesToTick) {
+            if (angle > angleToTick && (angle - deltaRadians) < angleToTick) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void removeSplashScreen() {
