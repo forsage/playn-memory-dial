@@ -37,24 +37,21 @@ public class Memdial extends Game.Default {
 
     @Override
     public void init() {
-        // create and add background image layer
         Image bgImage = assets().getImage("images/bg-f5f0f0.png");
         ImageLayer bgLayer = graphics().createImageLayer(bgImage);
         graphics().rootLayer().add(bgLayer);
 
-        // create a group layer to hold the peas
         groupLayer = graphics().createGroupLayer();
         graphics().rootLayer().add(groupLayer);
 
-        // preload the pea image into the asset manager cache
         assets().getImage(Dial.IMAGE);
         dial = new Dial(groupLayer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-        // add a listener for pointer (mouse, touch) input
         pointer().setListener(new Pointer.Adapter() {
             @Override
             public void onPointerStart(Pointer.Event event) {
-                if ((!dial.isClockwise()) && (!dial.isDialling())) {
+                if ((!dial.isClockwise()) && (!dial.isDialling()) &&
+                        (Dial.touchInsideHole(new Dial.Point(Math.round(event.x()) - 100, Math.round(event.y()) - 12)))) {
                     dial.setClockwise(true);
                     dial.beginDialling();
                 }

@@ -43,7 +43,6 @@ public class Dial {
     private int numberDialling = -1;
 
     private static final List<Point> NUMBER_COORDS = new ArrayList<Point>();
-
     static {
         NUMBER_COORDS.add(new Point(412, 451));
         NUMBER_COORDS.add(new Point(492, 307));
@@ -57,8 +56,16 @@ public class Dial {
         NUMBER_COORDS.add(new Point(290, 492));
     }
 
-    private static final Map<Integer, Double> DIAL_ANGLES = new TreeMap<Integer, Double>();
+    public static final int TOUCH_RADIUS = 52;
 
+    public static boolean touchInsideHole(Point pTouch) {
+        for (Point pToTouch : NUMBER_COORDS) {
+            if (pToTouch.isNearTo(pTouch, TOUCH_RADIUS)) { return true; }
+        }
+        return false;
+    }
+
+    private static final Map<Integer, Double> DIAL_ANGLES = new TreeMap<Integer, Double>();
     static {
         DIAL_ANGLES.put(0, -2 * Math.PI * 0.133);
         DIAL_ANGLES.put(9, -2 * Math.PI * 0.233);
@@ -102,7 +109,8 @@ public class Dial {
     }
 
     private void drawPaused() {
-        pausedLayer = createLayerWithTexts(new String[]{"P", "A", "U", "S", "E", "D"}, new Integer[]{0xFFFF0000, 0xFFCC0000, 0xFF990000, 0xFF660000, 0xFF330000, 0xFF000000});
+        pausedLayer = createLayerWithTexts(new String[]{"P", "A", "U", "S", "E", "D"},
+                new Integer[]{0xFFFF0000, 0xFFCC0000, 0xFF990000, 0xFF660000, 0xFF330000, 0xFF000000});
         pausedLayer.setTranslation(600, 0);
         parentLayer.add(pausedLayer);
     }
@@ -123,7 +131,7 @@ public class Dial {
         this.numberDialling = numberDialling;
     }
 
-    private static class Point {
+    public static class Point {
         Point(int x, int y) {
             this.x = x;
             this.y = y;
@@ -131,6 +139,12 @@ public class Dial {
 
         int x;
         int y;
+
+        boolean isNearTo(Point pOther, int r) {
+            int dx = Math.abs(pOther.x - x);
+            int dy = Math.abs(pOther.y - y);
+            return Math.sqrt(dx * dx + dy * dy) <= r;
+        }
     }
 
     public Dial(final GroupLayer parentLayer, final float x, final float y) {
