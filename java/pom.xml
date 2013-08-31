@@ -14,7 +14,7 @@
     <name>PlayN Memory Dial Java</name>
 
     <properties>
-        <mainClass>memdial.java.MemdialJava</mainClass>
+        <mainClass>memdial.java.MemdialGameJava</mainClass>
     </properties>
 
     <dependencies>

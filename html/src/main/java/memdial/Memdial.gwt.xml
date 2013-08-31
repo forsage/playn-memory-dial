@@ -28,5 +28,5 @@
     <source path='core'/>
     <source path='html'/>
 
-    <entry-point class='memdial.html.MemdialHtml'/>
+    <entry-point class='memdial.html.MemdialGameHtml'/>
 </module>
