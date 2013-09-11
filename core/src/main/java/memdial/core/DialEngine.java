@@ -47,7 +47,12 @@ public class DialEngine {
     }
 
     public void update(int delta) {
-        view.removeSplashScreen();
+        if (model.getRemainingSplashScreenTicks() == 0) {
+            view.removeSplashScreen();
+            model.setRemainingSplashScreenTicks(-1);
+        } else if (model.getRemainingSplashScreenTicks() > 0) {
+            model.setRemainingSplashScreenTicks(model.getRemainingSplashScreenTicks() - 1);
+        }
         if (model.isPlaying()) {
             rotateDial(delta);
         }

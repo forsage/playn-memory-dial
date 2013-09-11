@@ -6,17 +6,12 @@ import playn.core.util.Callback;
 import static playn.core.PlayN.*;
 
 public class View {
-    int remainingSplashScreenTicks = 2 * MemdialGame.UPDATE_RATE;
-
-    public int getRemainingSplashScreenTicks() {
-        return remainingSplashScreenTicks;
-    }
-
-    public void setRemainingSplashScreenTicks(int remainingSplashScreenTicks) {
-        this.remainingSplashScreenTicks = remainingSplashScreenTicks;
-    }
 
     GroupLayer rootLayer;
+    ImageLayer dialImageLayer;
+    ImageLayer textLayer;
+    ImageLayer dialledNumbersLayer;
+    ImageLayer pausedLayer;
 
     public GroupLayer getRootLayer() {
         return rootLayer;
@@ -26,8 +21,6 @@ public class View {
         this.rootLayer = rootLayer;
     }
 
-    ImageLayer dialImageLayer;
-
     public ImageLayer getDialImageLayer() {
         return dialImageLayer;
     }
@@ -35,8 +28,6 @@ public class View {
     public void setDialImageLayer(ImageLayer dialImageLayer) {
         this.dialImageLayer = dialImageLayer;
     }
-
-    ImageLayer textLayer;
 
     public ImageLayer getTextLayer() {
         return textLayer;
@@ -46,8 +37,6 @@ public class View {
         this.textLayer = textLayer;
     }
 
-    ImageLayer dialledNumbersLayer;
-
     public ImageLayer getDialledNumbersLayer() {
         return dialledNumbersLayer;
     }
@@ -55,8 +44,6 @@ public class View {
     public void setDialledNumbersLayer(ImageLayer dialledNumbersLayer) {
         this.dialledNumbersLayer = dialledNumbersLayer;
     }
-
-    ImageLayer pausedLayer;
 
     public ImageLayer getPausedLayer() {
         return pausedLayer;
@@ -132,14 +119,9 @@ public class View {
     }
 
     void removeSplashScreen() {
-        if (getRemainingSplashScreenTicks() == 0) {
-            getRootLayer().remove(getDialledNumbersLayer());
-            setDialledNumbersLayer(createLayerWithText(""));
-            getRootLayer().add(getDialledNumbersLayer());
-            setRemainingSplashScreenTicks(-1);
-        } else if (getRemainingSplashScreenTicks() > 0) {
-            setRemainingSplashScreenTicks(getRemainingSplashScreenTicks() - 1);
-        }
+        getRootLayer().remove(getDialledNumbersLayer());
+        setDialledNumbersLayer(createLayerWithText(""));
+        getRootLayer().add(getDialledNumbersLayer());
     }
 
     int getColorRedForAngle(float angle) {
