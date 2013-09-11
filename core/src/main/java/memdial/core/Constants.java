@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Constants {
+    static final String LABEL_ERROR_LOADING_IMAGE = "Error loading image!";
+    static final String LABEL_DIAL_666 = "Dial\n666";
+    static final String LABEL_PRESS_KEY_OR_CLICK_TO_DIAL = "Press key or click to dial";
+    static final String SPACE = " ";
+    static final String LABEL_PAUSED = "PAUSED";
     static final String IMAGE_DIAL_PATH = "images/dial-retro-cut.png";
     static final double MIN_ANGLE_RAD = -2 * Math.PI;
     static final TextFormat TEXT_FORMAT = new TextFormat().withFont(PlayN.graphics()
@@ -21,10 +26,10 @@ public class Constants {
     static final int BETWEEN_CHARS_PX = 3;
     static final List<Point> NUMBERS_PX = new ArrayList<Point>();
     static final Map<Integer, Double> DIAL_ANGLES_RAD = new TreeMap<Integer, Double>();
+
     public static final String PATH_PREFIX = "memdial/";
     public static final String MEMDIAL_FONT_NAME = "king668";
     public static final String MEMDIAL_FONT_PATH = "fonts/king668.TTF";
-
 
     static {
         NUMBERS_PX.add(new Point(412, 451));

@@ -21,7 +21,7 @@ import java.util.*;
 
 public class DialEngine {
 
-    final View view = new View();
+    View view;
     final Model model = new Model();
 
     void play() {
@@ -39,11 +39,11 @@ public class DialEngine {
     }
 
     public DialEngine(final GroupLayer rootLayer, final float x, final float y) {
+        view = new View(rootLayer);
         view.initImageLayer(rootLayer, x, y);
         view.initTextLayer(rootLayer, x, y);
         view.initNumbersLayer(rootLayer);
         view.initSplashScreenLayer(rootLayer);
-        view.setRootLayer(rootLayer);
     }
 
     public void update(int delta) {
@@ -71,8 +71,7 @@ public class DialEngine {
     }
 
     private void rotateDialCcw(int delta) {
-        double angleRatio = Math.abs(model.getAngleOfDialRad()) / Math.abs(Constants.MIN_ANGLE_RAD);
-        double correctionFactor = 1 - (angleRatio * angleRatio);
+        double correctionFactor = 0.4;
         double deltaRadians = correctionFactor * 2 * Math.PI * Constants.SPEED_CCW_RAD / delta;
         if (model.cntTicksOnNumberHit > 0 && model.shouldTick(model.getAngleOfDialRad(), deltaRadians)) {
             model.setAngleOfDialRad(new Double(model.getAngleOfDialRad() + deltaRadians / 2).floatValue());
@@ -107,10 +106,10 @@ public class DialEngine {
         model.getNumbersDialled().add(Integer.toString(numberDialled));
         String[] arrayNumbersDialled = new String[model.getNumbersDialled().size()];
         arrayNumbersDialled = model.getNumbersDialled().toArray(arrayNumbersDialled);
-        model.getColorsOfNumbersDialled().add(view.getColorRedForDigit(numberDialled));
+        model.getColorsOfNumbersDialled().add(ViewUtils.getColorRedForDigit(numberDialled));
         Integer[] arrayColors = new Integer[model.getColorsOfNumbersDialled().size()];
         arrayColors = model.getColorsOfNumbersDialled().toArray(arrayColors);
-        view.setDialledNumbersLayer(view.createLayerWithTexts(arrayNumbersDialled, arrayColors));
+        view.setDialledNumbersLayer(ViewActions.createLayerWithTexts(arrayNumbersDialled, arrayColors));
         view.getRootLayer().add(view.getDialledNumbersLayer());
     }
 

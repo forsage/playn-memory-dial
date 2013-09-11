@@ -79,7 +79,7 @@ public class MemdialGame extends Game.Default {
             @Override
             public void onPointerStart(Pointer.Event event) {
                 if ((!dialEngine.model.isCw()) && (!dialEngine.model.isDialling()) &&
-                        (View.touchInsideHole(
+                        (ViewUtils.touchInsideHole(
                                 new Point(Math.round(event.x()) - 100, Math.round(event.y()) - 12)))) {
                     dialEngine.model.setCw(true);
                     dialEngine.beginDialling();
